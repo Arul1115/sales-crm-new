@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tatva Packagings | Sales Portal</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+:root{--brand:#0d3b73;--brand2:#1660a7;--bg:#f4f6f9;}
+body{background:var(--bg);font-family:'Segoe UI',Arial,sans-serif;}
+#loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--brand),var(--brand2));}
+.login-card{width:400px;border:none;border-radius:14px;box-shadow:0 15px 40px rgba(0,0,0,.25);}
+.brand-title{color:var(--brand);font-weight:700;letter-spacing:.5px;}
+#topbar{background:var(--brand);color:#fff;height:56px;display:flex;align-items:center;padding:0 16px;position:sticky;top:0;z-index:1030;}
+#topbar .company{font-weight:700;font-size:1.05rem;}
+#topbar .tag{font-size:.72rem;opacity:.8;}
+#sidebar{width:220px;min-height:calc(100vh - 56px);background:#fff;border-right:1px solid #e3e6ea;overflow-y:auto;}
+#sidebar .nav-link{color:#33414f;font-size:.88rem;padding:.55rem .9rem;border-left:3px solid transparent;cursor:pointer;}
+#sidebar .nav-link i{width:20px;text-align:center;margin-right:6px;}
+#sidebar .nav-link.active,#sidebar .nav-link:hover{background:#eef4fb;color:var(--brand);border-left-color:var(--brand);}
+#mainContent{flex:1;padding:18px 22px;min-height:calc(100vh - 56px);}
+.view{display:none;}
+.view.active{display:block;}
+.kpi-card{border:none;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06);}
+.kpi-card .num{font-size:1.5rem;font-weight:700;color:var(--brand);}
+.kpi-card .label{font-size:.72rem;color:#6c757d;text-transform:uppercase;letter-spacing:.4px;}
+.module-card{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,.06);padding:16px;}
+table.table thead{background:#f0f4f9;font-size:.78rem;text-transform:uppercase;letter-spacing:.3px;color:#4a5a6a;}
+table.table td,table.table th{font-size:.85rem;vertical-align:middle;}
+.badge-status{font-size:.72rem;}
+.notif-dot{width:8px;height:8px;border-radius:50%;background:#dc3545;position:absolute;top:6px;right:6px;}
+@media print{#topbar,#sidebar,.no-print{display:none !important;} #mainContent{padding:0;}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="card login-card p-4">
+    <div class="text-center mb-3">
+      <div class="brand-title fs-4">TATVA PACKAGINGS</div>
+      <div class="text-muted small">Sales Portal — ERP / CRM</div>
+    </div>
+    <div id="loginAlert" class="alert alert-danger py-2 small d-none"></div>
+    <div class="mb-2"><label class="form-label small">Email</label><input id="loginEmail" type="email" class="form-control"></div>
+    <div class="mb-3"><label class="form-label small">Password</label><input id="loginPass" type="password" class="form-control"></div>
+    <button class="btn btn-primary w-100" onclick="doLogin()">Sign In</button>
+    <div class="small text-muted mt-3 text-center">Accounts are created by your Admin.</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appScreen" class="d-none">
+  <div id="topbar" class="d-flex justify-content-between">
+    <div class="d-flex align-items-center">
+      <div class="company">TATVA PACKAGINGS</div>
+      <div class="tag ms-2">Sales Portal</div>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <div class="position-relative" style="cursor:pointer" onclick="navTo('notifications')">
+        <i class="bi bi-bell fs-5"></i><span id="notifDot" class="notif-dot d-none"></span>
+      </div>
+      <div class="small" id="whoami"></div>
+      <button class="btn btn-sm btn-light" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+  <div class="d-flex">
+    <nav id="sidebar" class="d-flex flex-column py-2">
+      <a class="nav-link active" data-view="dashboard" onclick="navTo('dashboard')"><i class="bi bi-speedometer2"></i>Dashboard</a>
+      <a class="nav-link" data-view="clients" onclick="navTo('clients')"><i class="bi bi-people"></i>Clients</a>
+      <a class="nav-link" data-view="requirements" onclick="navTo('requirements')"><i class="bi bi-clipboard-data"></i>Requirements</a>
+      <a class="nav-link" data-view="quotations" onclick="navTo('quotations')"><i class="bi bi-file-earmark-text"></i>Quotations</a>
+      <a class="nav-link" data-view="purchaseOrders" onclick="navTo('purchaseOrders')"><i class="bi bi-receipt"></i>Purchase Orders</a>
+      <a class="nav-link" data-view="followups" onclick="navTo('followups')"><i class="bi bi-alarm"></i>Follow Ups</a>
+      <a class="nav-link" data-view="notifications" onclick="navTo('notifications')"><i class="bi bi-bell"></i>Notifications</a>
+      <a class="nav-link" data-view="reports" onclick="navTo('reports')"><i class="bi bi-bar-chart"></i>Reports</a>
+      <a class="nav-link" data-view="commission" onclick="navTo('commission')"><i class="bi bi-wallet2"></i>Commission</a>
+      <a class="nav-link" data-view="profile" onclick="navTo('profile')"><i class="bi bi-person"></i>Profile</a>
+    </nav>
+    <main id="mainContent">
+
+      <!-- DASHBOARD -->
+      <div class="view active" id="view-dashboard">
+        <h5 class="mb-3">My Dashboard</h5>
+        <div class="row g-3" id="kpiRow"></div>
+        <div class="row g-3 mt-1">
+          <div class="col-md-6"><div class="module-card"><h6>My Monthly PO Value</h6><canvas id="chartMonthly" height="160"></canvas></div></div>
+          <div class="col-md-6"><div class="module-card"><h6>My Commission</h6><canvas id="chartCommission" height="160"></canvas></div></div>
+        </div>
+        <div class="module-card mt-3">
+          <h6>Top Customers</h6>
+          <div id="topCustomers" class="small"></div>
+        </div>
+      </div>
+
+      <div class="view" id="view-clients"></div>
+      <div class="view" id="view-requirements"></div>
+      <div class="view" id="view-quotations"></div>
+      <div class="view" id="view-purchaseOrders"></div>
+      <div class="view" id="view-followups"></div>
+
+      <!-- REPORTS -->
+      <div class="view" id="view-reports">
+        <h5 class="mb-3">My Reports</h5>
+        <div class="mb-3 d-flex gap-2 flex-wrap">
+          <select id="reportPicker" class="form-select w-auto" onchange="renderReport()">
+            <option value="clients">My Clients</option>
+            <option value="requirements">My Requirements</option>
+            <option value="purchaseOrders">My Purchase Orders</option>
+            <option value="commission">My Commission</option>
+          </select>
+          <button class="btn btn-outline-secondary btn-sm" onclick="exportReportCSV()"><i class="bi bi-download"></i> Export CSV</button>
+        </div>
+        <div class="module-card"><div class="table-responsive"><table class="table table-hover">
+          <thead><tr id="reportHead"></tr></thead><tbody id="reportBody"></tbody>
+        </table></div></div>
+      </div>
+
+      <!-- COMMISSION (view only) -->
+      <div class="view" id="view-commission">
+        <h5 class="mb-3">My Commission</h5>
+        <div class="module-card"><div class="table-responsive"><table class="table table-hover">
+          <thead><tr><th>Voucher No</th><th>PO Number</th><th>Amount</th><th>Paid</th><th>Balance</th><th>Status</th></tr></thead>
+          <tbody id="commissionBody"></tbody>
+        </table></div></div>
+      </div>
+
+      <!-- NOTIFICATIONS -->
+      <div class="view" id="view-notifications">
+        <h5 class="mb-3">Notifications</h5>
+        <div class="module-card"><div id="notifList" class="list-group list-group-flush"></div></div>
+      </div>
+
+      <!-- PROFILE -->
+      <div class="view" id="view-profile">
+        <h5 class="mb-3">My Profile</h5>
+        <div class="module-card" style="max-width:420px">
+          <label class="form-label small">Name</label><input id="profName" class="form-control mb-2">
+          <label class="form-label small">Mobile</label><input id="profMobile" class="form-control mb-2">
+          <label class="form-label small">Email</label><input id="profEmail" class="form-control mb-2" disabled>
+          <button class="btn btn-primary btn-sm" onclick="saveProfile()">Save</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<div class="modal fade" id="genericModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title" id="genericModalTitle">Form</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body"><form id="genericForm" class="row g-2"></form></div>
+      <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary" onclick="submitGenericForm()">Save</button></div>
+    </div>
+  </div>
+</div>
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="toastHost"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+<script>
+/* ================= FIREBASE ================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyBK3-JNmbgf2mtr6F0-9mq0kPTlPvJfJII",
+  authDomain: "sales-crm-87202.firebaseapp.com",
+  projectId: "sales-crm-87202",
+  storageBucket: "sales-crm-87202.firebasestorage.app",
+  messagingSenderId: "766645090323",
+  appId: "1:766645090323:web:3196990dcbb5032e7827e6",
+  measurementId: "G-JD47Y8EC8Q"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* ================= STATE ================= */
+const state = {
+  uid:null, name:'', email:'', role:null, mobile:'',
+  clients:[], requirements:[], quotations:[], purchaseOrders:[], followups:[],
+  commission:[], notifications:[]
+};
+let currentView='dashboard';
+
+function toast(msg,type='success'){
+  const id='t'+Date.now();
+  document.getElementById('toastHost').insertAdjacentHTML('beforeend',
+   `<div class="toast align-items-center text-bg-${type} border-0" id="${id}" role="alert"><div class="d-flex">
+    <div class="toast-body">${msg}</div><button class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div>`);
+  new bootstrap.Toast(document.getElementById(id),{delay:3000}).show();
+}
+function esc(s){ return (s===undefined||s===null)?'':String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function fmtMoney(n){ return '₹'+Number(n||0).toLocaleString('en-IN'); }
+
+/* ================= AUTH ================= */
+function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const alertBox=document.getElementById('loginAlert');
+  alertBox.classList.add('d-none');
+  auth.signInWithEmailAndPassword(email,pass).then(async cred=>{
+    const doc = await db.collection('users').doc(cred.user.uid).get();
+    if(!doc.exists || doc.data().role!=='sales'){
+      await auth.signOut();
+      alertBox.textContent='Access denied. This login is not a Sales account.';
+      alertBox.classList.remove('d-none');
+      return;
+    }
+    state.uid=cred.user.uid; state.name=doc.data().name; state.email=email; state.role='sales'; state.mobile=doc.data().mobile||'';
+    enterApp();
+  }).catch(err=>{ alertBox.textContent=err.message; alertBox.classList.remove('d-none'); });
+}
+function doLogout(){ auth.signOut().then(()=>location.reload()); }
+auth.onAuthStateChanged(async user=>{
+  if(user){
+    const doc = await db.collection('users').doc(user.uid).get();
+    if(doc.exists && doc.data().role==='sales'){
+      state.uid=user.uid; state.name=doc.data().name; state.email=user.email; state.role='sales'; state.mobile=doc.data().mobile||'';
+      enterApp();
+    }
+  }
+});
+function enterApp(){
+  document.getElementById('loginScreen').classList.add('d-none');
+  document.getElementById('appScreen').classList.remove('d-none');
+  document.getElementById('whoami').textContent = state.name + ' (Sales)';
+  initListeners();
+  navTo('dashboard');
+}
+
+/* ================= NAV ================= */
+function navTo(view){
+  currentView=view;
+  document.querySelectorAll('#sidebar .nav-link').forEach(a=>a.classList.toggle('active', a.dataset.view===view));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+view).classList.add('active');
+  if(MODULES[view]) renderModuleView(view);
+  if(view==='dashboard') renderDashboard();
+  if(view==='reports') renderReport();
+  if(view==='commission') renderCommission();
+  if(view==='notifications') renderNotifList();
+  if(view==='profile'){
+    document.getElementById('profName').value=state.name;
+    document.getElementById('profMobile').value=state.mobile;
+    document.getElementById('profEmail').value=state.email;
+  }
+}
+
+function getNextNumber(prefix){
+  const ref = db.collection('counters').doc(prefix);
+  return db.runTransaction(async t=>{
+    const doc = await t.get(ref);
+    let seq = 1;
+    if(doc.exists) seq = (doc.data().seq||0)+1;
+    t.set(ref,{seq},{merge:true});
+    const yr=new Date().getFullYear();
+    return prefix+'-'+yr+'-'+String(seq).padStart(4,'0');
+  });
+}
+function logActivity(action){ db.collection('activityLogs').add({user:state.name,action,ts:firebase.firestore.FieldValue.serverTimestamp()}); }
+function pushNotification(text){ db.collection('notifications').add({text,read:false,ts:firebase.firestore.FieldValue.serverTimestamp()}); }
+
+/* ================= MODULE ENGINE (own-data only) ================= */
+const MODULES = {
+  clients:{
+    title:'My Clients', collection:'clients', numberField:'clientCode', prefix:'CL',
+    searchFields:['clientCode','companyName','contactPerson','mobile','city'],
+    columns:[
+      {k:'clientCode',l:'Code'},{k:'companyName',l:'Company'},{k:'contactPerson',l:'Contact'},
+      {k:'mobile',l:'Mobile'},{k:'city',l:'City'}
+    ],
+    fields:[
+      {n:'companyName',l:'Company Name',t:'text',req:true},
+      {n:'gst',l:'GST Number',t:'text'},{n:'pan',l:'PAN Number',t:'text'},
+      {n:'contactPerson',l:'Contact Person',t:'text',req:true},
+      {n:'mobile',l:'Mobile Number',t:'text',req:true},
+      {n:'whatsapp',l:'WhatsApp Number',t:'text'},
+      {n:'email',l:'Email',t:'email'},
+      {n:'address',l:'Address',t:'textarea'},
+      {n:'city',l:'City',t:'text'},{n:'state',l:'State',t:'text'},{n:'pin',l:'PIN Code',t:'text'},
+      {n:'remarks',l:'Remarks',t:'textarea'}
+    ],
+    beforeSave:(data)=>{ data.assignedSalesUid=state.uid; data.assignedSalesName=state.name; },
+    afterSave:(isNew)=>{ if(isNew) pushNotification('New client added by '+state.name); },
+    scope:true
+  },
+  requirements:{
+    title:'My Requirements', collection:'requirements', numberField:'requirementNo', prefix:'REQ',
+    searchFields:['requirementNo','clientCode','productType'],
+    columns:[
+      {k:'requirementNo',l:'No'},{k:'clientCode',l:'Client'},{k:'productType',l:'Product'},
+      {k:'quantity',l:'Qty'},{k:'expectedPrice',l:'Exp. Price'},{k:'status',l:'Status',badge:true}
+    ],
+    fields:[
+      {n:'clientCode',l:'Client',t:'select',req:true,source:()=>state.clients.map(c=>({v:c.clientCode,t:c.clientCode+' - '+c.companyName}))},
+      {n:'requirementDate',l:'Requirement Date',t:'date'},
+      {n:'productType',l:'Product Type',t:'select',options:['Corrugated Box','Mono Carton','Duplex Box','Printed Box','Export Box']},
+      {n:'length',l:'Length',t:'number'},{n:'width',l:'Width',t:'number'},{n:'height',l:'Height',t:'number'},
+      {n:'ply',l:'Ply',t:'text'},{n:'paperGSM',l:'Paper GSM',t:'text'},{n:'bf',l:'BF',t:'text'},
+      {n:'printing',l:'Printing',t:'text'},
+      {n:'quantity',l:'Quantity',t:'number'},{n:'expectedPrice',l:'Expected Price',t:'number'},
+      {n:'deliveryLocation',l:'Delivery Location',t:'text'},{n:'deliveryDate',l:'Delivery Date',t:'date'},
+      {n:'remarks',l:'Remarks',t:'textarea'}
+    ],
+    beforeSave:(data)=>{ data.status='Pending'; },
+    afterSave:(isNew)=>{ if(isNew) pushNotification(state.name+' submitted a new requirement'); },
+    scope:true
+  },
+  quotations:{
+    title:'Quotations Received', collection:'quotations', readOnly:true,
+    searchFields:['quoteNo','clientCode'],
+    columns:[
+      {k:'quoteNo',l:'Quote No'},{k:'clientCode',l:'Client'},{k:'manufacturerCode',l:'Manufacturer'},
+      {k:'totalAmount',l:'Total'},{k:'validity',l:'Validity'},{k:'status',l:'Status',badge:true}
+    ],
+    scope:true
+  },
+  purchaseOrders:{
+    title:'My Purchase Orders', collection:'purchaseOrders', numberField:'poEntryNo', prefix:'PO',
+    searchFields:['poEntryNo','poNumber','clientCode'],
+    columns:[
+      {k:'poEntryNo',l:'Entry No'},{k:'poNumber',l:'PO Number'},{k:'clientCode',l:'Client'},
+      {k:'poAmount',l:'Amount'},{k:'expectedDeliveryDate',l:'Expected Delivery'},{k:'status',l:'Status',badge:true}
+    ],
+    fields:[
+      {n:'poNumber',l:'PO Number',t:'text',req:true},
+      {n:'poDate',l:'PO Date',t:'date'},
+      {n:'poAmount',l:'PO Amount',t:'number'},
+      {n:'clientCode',l:'Client',t:'select',source:()=>state.clients.map(c=>({v:c.clientCode,t:c.clientCode+' - '+c.companyName}))},
+      {n:'quoteNo',l:'Quote Number',t:'select',source:()=>state.quotations.map(q=>({v:q.quoteNo,t:q.quoteNo}))},
+      {n:'expectedDeliveryDate',l:'Expected Delivery Date',t:'date'},
+      {n:'remarks',l:'Remarks',t:'textarea'}
+    ],
+    beforeSave:(data)=>{ data.status='Pending'; },
+    afterSave:(isNew)=>{ if(isNew) pushNotification(state.name+' uploaded a PO — awaiting admin approval'); },
+    scope:true
+  },
+  followups:{
+    title:'Follow Ups', collection:'followups', numberField:'followupNo', prefix:'FU',
+    searchFields:['followupNo','clientCode'],
+    columns:[
+      {k:'followupNo',l:'No'},{k:'clientCode',l:'Client'},{k:'reminderDate',l:'Date'},
+      {k:'priority',l:'Priority'},{k:'status',l:'Status',badge:true}
+    ],
+    fields:[
+      {n:'clientCode',l:'Client',t:'select',req:true,source:()=>state.clients.map(c=>({v:c.clientCode,t:c.clientCode+' - '+c.companyName}))},
+      {n:'reminderDate',l:'Reminder Date',t:'date'},
+      {n:'reminderTime',l:'Reminder Time',t:'time'},
+      {n:'priority',l:'Priority',t:'select',options:['Low','Medium','High']},
+      {n:'notes',l:'Notes',t:'textarea'},
+      {n:'status',l:'Status',t:'select',options:['Pending','Done']}
+    ],
+    scope:true
+  }
+};
+
+function badgeClass(v){
+  const m={Approved:'success',Received:'success',Paid:'success',Completed:'success',Done:'success',
+    Pending:'warning',Partial:'info',Draft:'secondary',Revision:'warning',Rejected:'danger',Sent:'primary'};
+  return m[v]||'secondary';
+}
+
+function renderModuleView(key){
+  const cfg=MODULES[key];
+  const el=document.getElementById('view-'+key);
+  el.innerHTML = `
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="m-0">${cfg.title}</h5>
+      <div class="d-flex gap-2">
+        <input type="text" class="form-control form-control-sm" style="width:220px" placeholder="Search..." oninput="renderTable('${key}',this.value)">
+        <button class="btn btn-sm btn-outline-secondary" onclick="exportCSV('${key}')"><i class="bi bi-download"></i> CSV</button>
+        ${cfg.readOnly? '' : `<button class="btn btn-sm btn-primary" onclick="openForm('${key}')"><i class="bi bi-plus-lg"></i> Add</button>`}
+      </div>
+    </div>
+    <div class="module-card"><div class="table-responsive"><table class="table table-hover">
+      <thead><tr>${cfg.columns.map(c=>'<th>'+c.l+'</th>').join('')}${cfg.readOnly?'':'<th>Actions</th>'}</tr></thead>
+      <tbody id="tbody-${key}"></tbody>
+    </table></div></div>`;
+  renderTable(key,'');
+}
+
+function renderTable(key,q){
+  const cfg=MODULES[key];
+  q=(q||'').toLowerCase();
+  let rows = state[key]||[];
+  if(q) rows = rows.filter(r=>cfg.searchFields.some(f=>(r[f]||'').toString().toLowerCase().includes(q)));
+  const tbody=document.getElementById('tbody-'+key);
+  if(!tbody) return;
+  tbody.innerHTML = rows.map(r=>{
+    const tds = cfg.columns.map(c=>{
+      let v=r[c.k];
+      if(c.badge && v) return `<td><span class="badge bg-${badgeClass(v)} badge-status">${esc(v)}</span></td>`;
+      return `<td>${esc(v)}</td>`;
+    }).join('');
+    const actions = cfg.readOnly? '' : `<td>
+      <button class="btn btn-sm btn-outline-primary" onclick="openForm('${key}','${r.id}')"><i class="bi bi-pencil"></i></button>
+      <button class="btn btn-sm btn-outline-danger" onclick="deleteDoc('${key}','${r.id}')"><i class="bi bi-trash"></i></button>
+    </td>`;
+    return `<tr>${tds}${actions}</tr>`;
+  }).join('') || `<tr><td colspan="${cfg.columns.length+1}" class="text-center text-muted">No records</td></tr>`;
+}
+
+let editingKey=null, editingId=null;
+function openForm(key,id){
+  editingKey=key; editingId=id||null;
+  const cfg=MODULES[key];
+  const record = id? (state[key].find(r=>r.id===id)||{}) : {};
+  document.getElementById('genericModalTitle').textContent=(id?'Edit ':'Add ')+cfg.title;
+  const form=document.getElementById('genericForm');
+  form.innerHTML = cfg.fields.map(f=>{
+    let input='';
+    const val=record[f.n]!==undefined?record[f.n]:'';
+    if(f.t==='select'){
+      const opts=f.source?f.source():(f.options||[]).map(o=>({v:o,t:o}));
+      input=`<select class="form-select" name="${f.n}" ${f.req?'required':''}><option value="">-- Select --</option>${opts.map(o=>`<option value="${esc(o.v)}" ${o.v==val?'selected':''}>${esc(o.t)}</option>`).join('')}</select>`;
+    } else if(f.t==='textarea'){
+      input=`<textarea class="form-control" name="${f.n}" rows="2">${esc(val)}</textarea>`;
+    } else {
+      input=`<input type="${f.t}" class="form-control" name="${f.n}" value="${esc(val)}" ${f.req?'required':''}>`;
+    }
+    return `<div class="col-md-6"><label class="form-label small">${f.l}</label>${input}</div>`;
+  }).join('');
+  new bootstrap.Modal(document.getElementById('genericModal')).show();
+}
+
+async function submitGenericForm(){
+  const key=editingKey, cfg=MODULES[key];
+  const form=document.getElementById('genericForm');
+  if(!form.checkValidity()){ form.reportValidity(); return; }
+  const data={};
+  cfg.fields.forEach(f=>{ const el=form.elements[f.n]; if(el) data[f.n]=el.value; });
+  if(cfg.beforeSave) cfg.beforeSave(data);
+  try{
+    if(editingId){
+      await db.collection(cfg.collection).doc(editingId).update(data);
+      toast(cfg.title+' updated'); logActivity('Updated '+cfg.title+' '+editingId);
+    }else{
+      if(cfg.numberField){ data[cfg.numberField]=await getNextNumber(cfg.prefix); }
+      data.createdBy=state.name; data.createdByUid=state.uid;
+      data.createdAt=firebase.firestore.FieldValue.serverTimestamp();
+      await db.collection(cfg.collection).add(data);
+      toast(cfg.title+' added'); logActivity('Added '+cfg.title);
+    }
+    if(cfg.afterSave) cfg.afterSave(!editingId,data);
+    bootstrap.Modal.getInstance(document.getElementById('genericModal')).hide();
+  }catch(e){ toast(e.message,'danger'); }
+}
+
+function deleteDoc(key,id){
+  if(!confirm('Delete this record?')) return;
+  db.collection(MODULES[key].collection).doc(id).delete().then(()=>{ toast('Deleted'); logActivity('Deleted from '+MODULES[key].title); });
+}
+
+function exportCSV(key){
+  const cfg=MODULES[key]; const rows=state[key]||[];
+  let csv=cfg.columns.map(c=>c.l).join(',')+'\n';
+  rows.forEach(r=>{ csv+=cfg.columns.map(c=>'"'+(r[c.k]||'')+'"').join(',')+'\n'; });
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=key+'.csv'; a.click();
+}
+
+/* ================= DASHBOARD ================= */
+function renderDashboard(){
+  const myPOs = state.purchaseOrders;
+  const k=[
+    {label:'My Clients', num:state.clients.length},
+    {label:'Requirements Sent', num:state.requirements.length},
+    {label:'Quote Pending', num:state.quotations.filter(q=>q.status==='Draft'||q.status==='Sent').length},
+    {label:'Quote Approved', num:state.quotations.filter(q=>q.status==='Approved').length},
+    {label:'PO Received', num:myPOs.length},
+    {label:'Today Followups', num:state.followups.filter(f=>f.reminderDate===new Date().toISOString().slice(0,10)).length},
+    {label:'My Commission', num:fmtMoney(state.commission.reduce((s,x)=>s+(+x.commissionAmount||0),0))},
+    {label:'Commission Pending', num:fmtMoney(state.commission.reduce((s,x)=>s+(+x.balance||0),0))}
+  ];
+  document.getElementById('kpiRow').innerHTML = k.map(x=>`
+    <div class="col-6 col-md-3"><div class="kpi-card p-3"><div class="num">${x.num}</div><div class="label">${x.label}</div></div></div>`).join('');
+  drawCharts();
+  const byClient={};
+  state.purchaseOrders.forEach(p=>{ byClient[p.clientCode]=(byClient[p.clientCode]||0)+(+p.poAmount||0); });
+  const top = Object.entries(byClient).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  document.getElementById('topCustomers').innerHTML = top.map(t=>`<div class="border-bottom py-1">${esc(t[0])} — ${fmtMoney(t[1])}</div>`).join('') || 'No orders yet.';
+}
+let chartMonthly, chartCommission;
+function drawCharts(){
+  const byMonth={};
+  state.purchaseOrders.forEach(p=>{ const m=(p.poDate||'').slice(0,7)||'Unknown'; byMonth[m]=(byMonth[m]||0)+(+p.poAmount||0); });
+  const labels=Object.keys(byMonth).sort(); const data=labels.map(l=>byMonth[l]);
+  const ctx1=document.getElementById('chartMonthly').getContext('2d');
+  if(chartMonthly) chartMonthly.destroy();
+  chartMonthly=new Chart(ctx1,{type:'bar',data:{labels,datasets:[{label:'PO Value',data,backgroundColor:'#1660a7'}]},options:{plugins:{legend:{display:false}}}});
+  const paid=state.commission.reduce((s,x)=>s+(+x.paidAmount||0),0);
+  const pending=state.commission.reduce((s,x)=>s+(+x.balance||0),0);
+  const ctx2=document.getElementById('chartCommission').getContext('2d');
+  if(chartCommission) chartCommission.destroy();
+  chartCommission=new Chart(ctx2,{type:'doughnut',data:{labels:['Paid','Pending'],datasets:[{data:[paid,pending],backgroundColor:['#198754','#ffc107']}]}});
+}
+
+/* ================= COMMISSION / REPORTS ================= */
+function renderCommission(){
+  document.getElementById('commissionBody').innerHTML = state.commission.map(c=>
+    `<tr><td>${esc(c.commissionVoucherNo)}</td><td>${esc(c.poNumber)}</td><td>${fmtMoney(c.commissionAmount)}</td><td>${fmtMoney(c.paidAmount)}</td><td>${fmtMoney(c.balance)}</td><td><span class="badge bg-${badgeClass(c.status)}">${esc(c.status)}</span></td></tr>`
+  ).join('') || '<tr><td colspan="6" class="text-center text-muted">No commission records</td></tr>';
+}
+function renderReport(){
+  const key=document.getElementById('reportPicker').value;
+  let cols, rows;
+  if(key==='commission'){
+    cols=[{k:'commissionVoucherNo',l:'Voucher'},{k:'poNumber',l:'PO'},{k:'commissionAmount',l:'Amount'},{k:'paidAmount',l:'Paid'},{k:'balance',l:'Balance'},{k:'status',l:'Status'}];
+    rows=state.commission;
+  } else {
+    cols=MODULES[key].columns; rows=state[key];
+  }
+  document.getElementById('reportHead').innerHTML = cols.map(c=>'<th>'+c.l+'</th>').join('');
+  document.getElementById('reportBody').innerHTML = rows.map(r=>'<tr>'+cols.map(c=>'<td>'+esc(r[c.k])+'</td>').join('')+'</tr>').join('') || '<tr><td class="text-center text-muted">No data</td></tr>';
+}
+function exportReportCSV(){
+  const key=document.getElementById('reportPicker').value;
+  if(key==='commission'){
+    let csv='Voucher,PO,Amount,Paid,Balance,Status\n';
+    state.commission.forEach(c=>{ csv+=`"${c.commissionVoucherNo}","${c.poNumber}","${c.commissionAmount}","${c.paidAmount}","${c.balance}","${c.status}"\n`; });
+    const blob=new Blob([csv],{type:'text/csv'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='commission.csv'; a.click();
+  } else { exportCSV(key); }
+}
+
+/* ================= NOTIFICATIONS ================= */
+function renderNotifList(){
+  document.getElementById('notifList').innerHTML = state.notifications.slice(0,50).map(n=>
+    `<div class="list-group-item"><div class="small text-muted">${n.ts&&n.ts.toDate? n.ts.toDate().toLocaleString():''}</div>${esc(n.text)}</div>`).join('') || '<div class="text-muted p-2">No notifications</div>';
+  document.getElementById('notifDot').classList.add('d-none');
+}
+
+function saveProfile(){
+  const name=document.getElementById('profName').value.trim();
+  const mobile=document.getElementById('profMobile').value.trim();
+  db.collection('users').doc(state.uid).update({name,mobile}).then(()=>{ state.name=name; state.mobile=mobile; toast('Profile updated'); document.getElementById('whoami').textContent=name+' (Sales)'; });
+}
+
+/* ================= LISTENERS (scoped to this sales user) ================= */
+function initListeners(){
+  db.collection('clients').where('assignedSalesUid','==',state.uid).onSnapshot(snap=>{
+    state.clients = snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(currentView==='clients') renderTable('clients','');
+    if(currentView==='dashboard') renderDashboard();
+  });
+  db.collection('requirements').where('createdByUid','==',state.uid).onSnapshot(snap=>{
+    state.requirements = snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(currentView==='requirements') renderTable('requirements','');
+    if(currentView==='dashboard') renderDashboard();
+  });
+  db.collection('quotations').where('salesPersonUid','==',state.uid).onSnapshot(snap=>{
+    state.quotations = snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(currentView==='quotations') renderTable('quotations','');
+    if(currentView==='dashboard') renderDashboard();
+  });
+  db.collection('purchaseOrders').where('createdByUid','==',state.uid).onSnapshot(snap=>{
+    state.purchaseOrders = snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(currentView==='purchaseOrders') renderTable('purchaseOrders','');
+    if(currentView==='dashboard'){ renderDashboard(); }
+  });
+  db.collection('followups').where('createdByUid','==',state.uid).onSnapshot(snap=>{
+    state.followups = snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(currentView==='followups') renderTable('followups','');
+    if(currentView==='dashboard') renderDashboard();
+  });
+  db.collection('salesCommission').where('salesPersonUid','==',state.uid).onSnapshot(snap=>{
+    state.commission = snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(currentView==='commission') renderCommission();
+    if(currentView==='dashboard') renderDashboard();
+  });
+  db.collection('notifications').orderBy('ts','desc').limit(50).onSnapshot(snap=>{
+    state.notifications = snap.docs.map(d=>({id:d.id,...d.data()}));
+    document.getElementById('notifDot').classList.toggle('d-none', state.notifications.length===0);
+    if(currentView==='notifications') renderNotifList();
+  });
+}
+</script>
+</body>
+</html>
