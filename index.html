@@ -299,7 +299,7 @@ const MODULES = {
       {n:'clientCode',l:'Client',t:'select',req:true,source:()=>state.clients.map(c=>({v:c.clientCode,t:c.clientCode+' - '+c.companyName}))},
       {n:'requirementDate',l:'Requirement Date',t:'date'},
       {n:'productType',l:'Product Type',t:'select',options:['Corrugated Box','Mono Carton','Duplex Box','Printed Box','Export Box']},
-      {n:'length',l:'Length',t:'number'},{n:'width',l:'Width',t:'number'},{n:'height',l:'Height',t:'number'},
+      {n:'boxLength',l:'Length',t:'number'},{n:'width',l:'Width',t:'number'},{n:'height',l:'Height',t:'number'},
       {n:'ply',l:'Ply',t:'text'},{n:'paperGSM',l:'Paper GSM',t:'text'},{n:'bf',l:'BF',t:'text'},
       {n:'printing',l:'Printing',t:'text'},
       {n:'quantity',l:'Quantity',t:'number'},{n:'expectedPrice',l:'Expected Price',t:'number'},
